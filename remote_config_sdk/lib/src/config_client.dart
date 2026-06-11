@@ -1,23 +1,46 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'cache_manager.dart';
 
-class CacheManager {
-  static const _key = 'remote_config_cache';
+class ConfigClient {
+  final String baseUrl;
+  Map<String, dynamic> _cache = {};
+  bool _initialized = false;
 
-  static Future<void> save(Map<String, dynamic> data) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, jsonEncode(data));
+  ConfigClient({required this.baseUrl});
+
+  Future<void> init() async {
+    _cache = await CacheManager.load();
+    await fetchAll();
+    _initialized = true;
   }
 
-  static Future<Map<String, dynamic>> load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key);
-    if (raw == null) return {};
-    return jsonDecode(raw);
+  Future<void> fetchAll() async {
+    try {
+      final res = await http.get(Uri.parse('$baseUrl/stream'));
+      if (res.statusCode == 200) {
+        _cache = jsonDecode(res.body);
+        await CacheManager.save(_cache);
+      }
+    } catch (_) {}
   }
 
-  static Future<void> clear() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_key);
+  dynamic get(String category, String key) {
+    assert(_initialized, 'ConfigClient not initialized. Call init() first.');
+    return _cache[category]?[key];
+  }
+
+  bool getBool(String category, String key, {bool fallback = false}) =>
+      get(category, key) as bool? ?? fallback;
+
+  String getString(String category, String key, {String fallback = ''}) =>
+      get(category, key) as String? ?? fallback;
+
+  int getInt(String category, String key, {int fallback = 0}) =>
+      get(category, key) as int? ?? fallback;
+
+  void updateFromSSE(Map<String, dynamic> data) {
+    _cache = data;
+    CacheManager.save(_cache);
   }
 }
