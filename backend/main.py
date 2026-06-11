@@ -15,12 +15,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 DB = {}
 
 update_event = asyncio.Event()
 
+
 class UpdatePayload(BaseModel):
-    category: str
+    category: str = "feature_flags"
     key: str
     value: dict
 
@@ -33,10 +35,12 @@ async def seed_db(initial_data: dict):
 
 @app.post("/admin/update")
 async def update_data(payload: UpdatePayload):
+    # Ensure the category exists in the cache
     if payload.category not in DB:
         DB[payload.category] = {}
     
     DB[payload.category][payload.key] = payload.value
+    
     update_event.set()
     return {"status": "success", "message": f"{payload.key} updated"}
 
