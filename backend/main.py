@@ -5,8 +5,12 @@ from pydantic import BaseModel
 from typing import Any
 import asyncio
 import json
+from manager import init_db, load_all, upsert, seed as db_seed
 
 app = FastAPI(title="snivy")
+
+init_db()
+DB = load_all()
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,6 +31,7 @@ class UpdatePayload(BaseModel):
 @app.post("/admin/seed")
 async def seed_db(initial_data: dict):
     global DB
+    db_seed(initial_data)
     DB.update(initial_data)
     update_event.set()
     return {"status": "success", "message": "Database initialized"}
@@ -37,6 +42,7 @@ async def update_data(payload: UpdatePayload):
         DB[payload.category] = {}
     
     DB[payload.category][payload.key] = payload.value
+    upsert(payload.category, payload.key, payload.value)
     update_event.set()
     return {"status": "success", "message": f"{payload.key} updated"}
 
