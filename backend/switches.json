@@ -1,0 +1,4 @@
+[
+    {"label": "New Checkout Flow", "key": "new_checkout_flow", "id": "btn_checkout"},
+    {"label": "Dark Mode", "key": "dark_mode", "id": "btn_dark_mode"}
+]
