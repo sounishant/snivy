@@ -19,9 +19,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-DB = {}
-
 update_event = asyncio.Event()
 
 
@@ -62,3 +59,7 @@ async def stream_data(request: Request):
             update_event.clear()
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
