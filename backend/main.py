@@ -19,9 +19,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-DB = {}
-
 update_event = asyncio.Event()
 
 
@@ -62,3 +59,7 @@ async def stream_data(request: Request):
             update_event.clear()
 
     return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+@app.get("/config")
+async def get_config():
+    return DB
