@@ -17,7 +17,7 @@ class ConfigClient {
 
   Future<void> fetchAll() async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/stream'));
+     final res = await http.get(Uri.parse('$baseUrl/config'));
       if (res.statusCode == 200) {
         _cache = jsonDecode(res.body);
         await CacheManager.save(_cache);
