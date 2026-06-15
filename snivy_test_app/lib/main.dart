@@ -5,6 +5,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final notifier = ConfigNotifier(baseUrl: 'http://localhost:8000');
+ runApp(MaterialApp(
+    home: Scaffold(body: Center(child: CircularProgressIndicator())),
+  ));
+
   await notifier.init();
 
   runApp(MyApp(notifier: notifier));

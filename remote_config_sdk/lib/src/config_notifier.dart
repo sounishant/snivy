@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'config_client.dart';
-import '../sse_listener.dart';
+import 'sse_listener.dart';
 
 class ConfigNotifier extends ChangeNotifier {
   final ConfigClient _client;
